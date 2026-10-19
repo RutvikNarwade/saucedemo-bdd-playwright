@@ -173,7 +173,7 @@ addToCartButton(productName: string): Locator {
 Why I prefer it:
 - It finds the product the way a person does: by its name. The same name comes straight from the feature file, so one method works for all six products.
 - Position doesn't matter. If products are re-sorted (there's a sort dropdown on this page) or new ones are added, it still finds the right card.
-- The button is found by role and visible label, inside that one card only, so "Add to cart" matches exactly one button.
+- The button is found by role and visible label, inside that one card only, so "Add to cart" matches exactly one button. The label matters here: the product image and title links in each card also have `role="button"`, so `getByRole('button')` on its own would match three elements in the card.
 - `exact: true` stops "Sauce Labs Backpack" from also matching a longer name that contains it.
 - After the click the same card's button becomes "Remove", and I can check that with the same pattern (`removeButton()`).
 
@@ -365,6 +365,7 @@ In a real team I'd make `@smoke` a required check on PRs, run the full suite nig
 
 ### Known issue
 - On WebKit, one full run had one failed scenario. It didn't come back in the next 9 WebKit runs (6 normal, 3 parallel), and the reports folder was cleared before the failure was read, so the cause is unknown. Chromium (3 runs), Firefox and parallel runs were all green.
+- Later the same day, one run had `page.goto` timeouts (30 s, waiting for the page `load` event) in several scenarios at once. A minute later the site loaded in about 1.4 s and the same run passed. So the live site does have slow moments, and the WebKit failure may have been one of them, though I can't prove that.
 
 ## AI usage
 
