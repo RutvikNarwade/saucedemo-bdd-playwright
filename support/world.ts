@@ -31,6 +31,7 @@ export class CustomWorld extends World {
   readonly runId = `e2e-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   readonly startedAt = Date.now();
   customer?: Customer;
+  savedOrderId?: string;
 
   // Cleanup callbacks registered by steps, run by the After hook even if the scenario fails
   readonly cleanupTasks: Array<() => Promise<void>> = [];

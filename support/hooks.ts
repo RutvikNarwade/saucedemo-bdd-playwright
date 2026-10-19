@@ -1,6 +1,8 @@
 import { After, AfterAll, Before, BeforeAll, Status } from '@cucumber/cucumber';
 import type { Browser } from 'playwright';
+import { config } from '../config/config';
 import { launchBrowser } from './browserFactory';
+import { closeDb } from './db/dbClient';
 import { logger } from './logger';
 import type { CustomWorld } from './world';
 
@@ -14,6 +16,14 @@ BeforeAll(async function () {
 
 AfterAll(async function () {
   await browser?.close();
+  await closeDb();
+});
+
+// Fail fast instead of running the whole UI flow and failing at the DB step
+Before({ tags: '@db' }, function () {
+  if (!config.db.enabled) {
+    throw new Error('@db scenarios need a database. Set DB_ENABLED=true and the DB_* values in config/.env');
+  }
 });
 
 Before(async function (this: CustomWorld, { pickle }) {
@@ -28,7 +38,9 @@ After(async function (this: CustomWorld, { pickle, result }) {
   const fileName = `${pickle.name.replace(/[^a-z0-9]+/gi, '_')}_${this.runId}`;
 
   try {
-    if (status === Status.FAILED) {
+    if (!this.page) {
+      // A Before hook failed before the page was opened, so there is nothing to capture
+    } else if (status === Status.FAILED) {
       const screenshot = await this.page.screenshot({ path: `reports/screenshots/${fileName}.png`, fullPage: true });
       this.attach(screenshot, 'image/png');
       await this.context.tracing.stop({ path: `reports/traces/${fileName}.zip` });
