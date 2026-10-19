@@ -3,7 +3,7 @@
 BDD UI tests for [saucedemo.com](https://www.saucedemo.com) built with **Playwright + TypeScript + Cucumber**.
 This is my submission for the QA Automation Engineer take-home test.
 
-Walkthrough video: **TODO: add link**
+**Walkthrough video (7:50):** [download / watch SauceDemo-Walkthrough.mp4](https://github.com/RutvikNarwade/saucedemo-bdd-playwright/releases/download/v1.0/SauceDemo-Walkthrough.mp4) (attached to the [v1.0 release](https://github.com/RutvikNarwade/saucedemo-bdd-playwright/releases/tag/v1.0))
 
 ## Contents
 - [What's covered](#whats-covered)
@@ -383,4 +383,4 @@ In a real team I'd make `@smoke` a required check on PRs, run the full suite nig
   2. When a `Before` hook failed before the page was opened, the `After` hook still tried to take a screenshot and logged a confusing warning. It now skips that.
   3. Cucumber printed a warning when running a single feature file, because the paths were set in the config too. I removed them from the config, since `features/**` is the default anyway.
   4. The one WebKit failure in [Known issue](#known-issue).
-- **What I modified and why**: TODO: fill in after my own review
+- **What I did myself and why**: I didn't edit the code by hand. My part was the decisions: Playwright + TypeScript + Cucumber because it's what I know best, GitHub for the submission, and keeping the framework small enough that I can explain and change any part of it. I also recorded the walkthrough video myself.
