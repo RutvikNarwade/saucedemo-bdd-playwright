@@ -5,7 +5,6 @@ dotenv.config({ path: 'config/.env', quiet: true });
 
 // Cucumber profiles. Pick one with: npx cucumber-js --profile <name>
 const common = {
-  paths: ['features/**/*.feature'],
   requireModule: ['tsx/cjs'],
   require: ['support/**/*.ts', 'steps/**/*.ts'],
   format: [
