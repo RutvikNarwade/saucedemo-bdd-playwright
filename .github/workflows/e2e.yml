@@ -1,0 +1,79 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Cucumber tag expression, for example @smoke'
+        required: false
+        default: 'not @db'
+
+jobs:
+  ui-tests:
+    name: UI tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+    env:
+      BROWSER: ${{ matrix.browser }}
+      HEADLESS: 'true'
+      PARALLEL: '2'
+      RETRY: '1'
+      TAGS: ${{ inputs.tags || 'not @db' }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npm run typecheck
+      - run: npm test
+      - name: Upload report, screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cucumber-report-${{ matrix.browser }}
+          path: reports/
+          retention-days: 14
+
+  # SauceDemo has no DB, so this job proves the DB utility against a throwaway Postgres container
+  db-check:
+    name: DB utility check (Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_only_password
+          POSTGRES_DB: shop
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci_user -d shop"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: '5432'
+      DB_NAME: shop
+      DB_USER: ci_user
+      DB_PASSWORD: ci_only_password
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run db:check
